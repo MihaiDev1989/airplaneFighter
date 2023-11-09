@@ -1,0 +1,100 @@
+.airplain_fighter_table {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background-color: #000;
+}
+
+body {
+    background-image: url(./image/space.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    -webkit-background-size: cover;
+    background-size: cover;
+    padding-top: 450px;
+}
+
+.airplain_fighter_box_ct {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+    border: 1px solid blue;
+}
+
+.airplain {
+    position: absolute;
+    bottom: 0;
+    right: 50%;
+    transform: translateX(50%);
+    width: 50px;
+    height: 50px;
+    background-color: red;
+}
+
+.cloud1 {
+    position: absolute;
+    width: 200px;
+    left: 0;
+    top: 0;
+    animation: move 10s infinite;
+}
+
+.game_over_ct {
+    width: 350px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.game_over_ct img {
+    display: block;
+    width: 100%;
+}
+
+.restart {
+    font-family: 'Press Start 2P', cursive;
+    position: absolute;
+    top: calc(50% - -180px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.your_score {
+    width: 260px;
+    font-family: 'Press Start 2P', cursive;
+    color: #fff;
+    margin: 0 auto;
+    font-size: 12px;
+}
+
+.btn-success.restart {
+    color: #fff;
+    background-color: #000;
+    border-color: #fff;
+    margin: 53px 0 0 0;
+}
+
+.btn-success.restart:focus,
+.btn-success.restart:active {
+    box-shadow: initial !important;
+}
+
+.scor_ct {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    color: #fff;
+    margin: 20px 0 0 20px;
+}
+
+.scor_ct p {
+    margin: 0;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    line-height: 1.8;
+    color: #5d9cec;
+}
