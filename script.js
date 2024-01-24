@@ -1,132 +1,180 @@
-let canvas = document.getElementById("airplain_fighter_table_ct");
-const restartBtn = document.getElementById("restart_game");
-let ctx = canvas.getContext("2d");
+const canvas = document.getElementById("airplainFighterTableCt");
+const ctx = canvas.getContext("2d");
+
+const countDestroiedObjectsElm = document.getElementById("countDestroiedObjects");
+const countAvoidedRocksElm = document.getElementById("countAvoidedRocks");
+
+const gameOverScreen = document.getElementById("gameOverScreen");
+const restartBtn = document.getElementById("restartGame");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let airplaiPositionX, airplaiPositionY, rockX, rockY, playerWidth = 100, playerHeight = 80, bulletX, bulletY, speed = 400, hitRocks = 0, avoidedRock = 0;
-airplaiPositionX = (window.innerWidth / 2) - playerWidth / 2;
-airplaiPositionY = (window.innerHeight) - playerHeight;
+// Load images
+const playerImg = new Image();
+playerImg.src = "./image/airplain.png";
 
-const TILE = 40;
-let rocksToDestroy = 0;
+const bulletImg = new Image();
+bulletImg.src = "./image/bullet.png";
 
-const playerImage = new Image();
-playerImage.src = "./image/airplain.png";
-
-const bgImage = new Image();
-bgImage.src = "./image/space.png";
-
-const enemy = new Image();
-enemy.src = "./image/asteroid_enemy.png";
-
-const gameOver = new Image();
-gameOver.src = "./image/game_over.png";
-
-const bullet = new Image();
-bullet.src = "./image/bullet.png";
+const enemyImg = new Image();
+enemyImg.src = "./image/asteroid_enemy.png";
 
 const explosion = new Image();
 explosion.src = "./image/explosion.png";
 
-document.getElementById("count_ponits").innerHTML = hitRocks;
-document.getElementById("count_avoided_rocks").innerHTML = avoidedRock;
-document.getElementById("final_avoided_score").innerHTML = "Avoided objects: " + avoidedRock;
-document.getElementById("final_score").innerHTML = "Destroyed objects: " + hitRocks;
+// Player properties
+let playerX = canvas.width / 2;
+const playerY = canvas.height - 50;
+const playerSpeed = 15;
 
-function generateBoard() {
-    generateRocks();
-    ctx.drawImage(bgImage, 0, 0, window.innerWidth, window.innerHeight);
-    ctx.drawImage(playerImage, airplaiPositionX, airplaiPositionY, playerWidth, playerHeight);
-    boardUpdateInterval = setInterval(updateBoard, 400);
+// Bullet properties
+let bulletX = playerX;
+let bulletY = playerY;
+const bulletSpeed = 8;
+let isBulletFired = false;
+
+// Enemy properties
+let enemyX = 50;
+let enemyY = 0;
+const enemySpeed = 2;
+
+let drawExplosionSlow = false;
+let countAvoidedObjects = 0;
+let countDestroiedObjects = 0;
+let isGameOver = false;
+
+function drawPlayer() {
+    ctx.drawImage(playerImg, playerX - 40, playerY - 40, 80, 80);
 }
 
-function generateRocks() {
-    rockX = Math.floor(Math.random() * 36) * 10;
-    while (rockX % TILE != 0) {
-        rockX = Math.floor(Math.random() * 36) * 10;
-    }
-    rockY = Math.floor(Math.random());
+function drawBullet() {
+    ctx.drawImage(bulletImg, bulletX - 2, bulletY, 4, 10);
 }
 
-function placeRocks() {
-    ctx.drawImage(enemy, rockX, rockY, 50, 50);
-    rockY += TILE;
-    if (rockY > window.innerHeight) {
-        generateRocks();
-    }
+function drawEnemy() {
+    ctx.drawImage(enemyImg, enemyX, enemyY, 40, 40);
 }
 
-function updateBoard() {
-    ctx.clearRect(0, 0, canvas.width = window.innerWidth, canvas.height = window.innerHeight);
-    ctx.drawImage(bgImage, 0, 0, window.innerWidth, window.innerHeight);
-    ctx.drawImage(playerImage, airplaiPositionX, airplaiPositionY, playerWidth, playerHeight);
-    placeRocks();
-    checkPlaneCollision();
-    avoidedRocks();
-    if (rocksToDestroy == 1) {
-        shoot();
-    }
+function drawExplosion() {
+    ctx.drawImage(explosion, bulletX - 15, bulletY - 20, 100, 100);
 }
 
-function checkPlaneCollision() {
-    if (rockY >= airplaiPositionY + 10 && rockX === airplaiPositionX + 25) {
-        clearInterval(boardUpdateInterval);
-        ctx.clearRect(airplaiPositionX, airplaiPositionY, TILE, TILE);
-        ctx.drawImage(explosion, airplaiPositionX, airplaiPositionY, 100, 100);
-        setTimeout(() => {
-            renderGameOverImage();
-        }, "1000");
-
-    }
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function renderGameOverImage() {
-    canvas.style.display = "none";
+function countScores(countDestroiedObjects, countAvoidedObjects) {
+    countDestroiedObjectsElm.innerHTML = "";
+    countAvoidedRocksElm.innerHTML = "";
+    countDestroiedObjectsElm.innerHTML += "Destroied objects: " + countDestroiedObjects;
+    countAvoidedRocksElm.innerHTML += "Avoided objects: " + countAvoidedObjects;
 }
 
-function shoot() {
-    ctx.clearRect(bulletX, bulletY, 10, 20);
-    bulletY -= 20;
-    ctx.drawImage(bullet, bulletX, bulletY, 10, 20);
-    if (bulletY + 30 <= rockY && bulletX == rockX + 20) {
-        rocksToDestroy = 0;
-        ctx.drawImage(explosion, bulletX - 15, bulletY - 20, 100, 100);
-        generateRocks();
-        ++hitRocks;
-        document.getElementById("count_ponits").innerHTML = hitRocks;
-        document.getElementById("final_score").innerHTML = "Destroyed objects: " + hitRocks;
+function enemyBehavior() {
+    if (enemyY > canvas.height) {
+        enemyY = 0;
+        countAvoidedObjects += 1;
+
+        countScores(countDestroiedObjects, countAvoidedObjects)
+
+        let enemyRandomX = getRandomInt(0, canvas.width);
+
+        if (enemyRandomX >= canvas.width) {
+            enemyRandomX - enemy.width
+        } else if (enemyRandomX <= canvas.width) {
+            enemyRandomX - 40
+        }
+
+        enemyX = enemyRandomX;
     }
 }
 
-function avoidedRocks() {
-    if (rockY === 0) {
-        ++avoidedRock;
-        document.getElementById("count_avoided_rocks").innerHTML = avoidedRock;
-        document.getElementById("final_avoided_score").innerHTML = "Avoided objects: " + avoidedRock;
+function bulletBehavior() {
+    if (isBulletFired) {
+        ctx.clearRect(bulletX, bulletY, 10, 20);
+
+        bulletY -= bulletSpeed;
+        drawBullet();
+
+        if (bulletY <= 0) {
+            isBulletFired = false;
+            bulletY = playerY;
+        }
+
+        if (
+            bulletX < enemyX + 40 &&
+            bulletX + 4 > enemyX &&
+            bulletY < enemyY + 40 &&
+            bulletY + 10 > enemyY
+        ) {
+            countDestroiedObjects += 1;
+            countScores(countDestroiedObjects, countAvoidedObjects);
+
+            enemyX = Math.random() * (canvas.width - 40);
+            enemyY = -40;
+            drawExplosionSlow = true;
+            drawExplosion();
+
+            isBulletFired = false;
+            bulletY = playerY;
+        }
     }
 }
 
-window.onload = function () {
-    generateBoard();
+function playerBehavior() {
+    if (
+        playerX < enemyX + 80 &&
+        playerX + 80 > enemyX &&
+        playerY < enemyY + 80 &&
+        playerY + 80 > enemyY
+    ) {
+        ctx.drawImage(explosion, enemyX - 15, enemyY - 20, 100, 100);
+        isGameOver = true;
+        gameOverScreen.style.display = "flex";
+    }
 }
+
+function gameOverBehavior() {
+    if (!isGameOver) {
+        gameOverScreen.style.display = "none";
+        enemyY += enemySpeed;
+
+        if (drawExplosionSlow) {
+            setTimeout(() => {
+                requestAnimationFrame(update);
+            }, 150);
+            drawExplosionSlow = false;
+        } else {
+            requestAnimationFrame(update);
+        }
+    }
+}
+
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawPlayer();
+    enemyBehavior();
+    bulletBehavior();
+    playerBehavior();
+    drawEnemy();
+    gameOverBehavior();
+}
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' && playerX - playerSpeed >= 0) {
+        playerX -= playerSpeed;
+    } else if (e.key === 'ArrowRight' && playerX + playerSpeed <= canvas.width) {
+        playerX += playerSpeed;
+    } else if (e.key === ' ') {
+        isBulletFired = true;
+        bulletX = playerX;
+    }
+});
 
 restartBtn.addEventListener("click", function () {
     location.reload();
 });
 
-document.addEventListener("keydown", function (e) {
-    if (e.code === "ArrowRight" && airplaiPositionX <= window.innerWidth - 80) {
-        airplaiPositionX += 40;
-    } else if (e.code === "ArrowLeft" && airplaiPositionX >= 0 + 15) {
-        airplaiPositionX -= 40;
-    } else if (e.code == "Space") {
-        bulletX = airplaiPositionX + 45;
-        bulletY = airplaiPositionY - 20;
-        ctx.drawImage(bullet, bulletX, bulletY, 10, 20);
-        rocksToDestroy = 1;
-        shoot();
-    }
-    checkPlaneCollision();
-})
+update();
