@@ -44,20 +44,37 @@ let countAvoidedObjects = 0;
 let countDestroiedObjects = 0;
 let isGameOver = false;
 
+const playerXAxes = 40;
+const playerYAxes = 40;
+const playerWidth = 80;
+const playerHeight = 80;
+
+const bulletXAxes = 2;
+const bulletWidth = 4;
+const bulletHeight = 10;
+
+const enemyWidth = 40;
+const enemyHeight = 40;
+
+const explosionXAxes = 15;
+const explosionYAxes = 20;
+const explosionWidth = 100;
+const explosionHeight = 100;
+
 function drawPlayer() {
-    ctx.drawImage(playerImg, playerX - 40, playerY - 40, 80, 80);
+    ctx.drawImage(playerImg, playerX - playerXAxes, playerY - playerYAxes, playerWidth, playerHeight);
 }
 
 function drawBullet() {
-    ctx.drawImage(bulletImg, bulletX - 2, bulletY, 4, 10);
+    ctx.drawImage(bulletImg, bulletX - bulletXAxes, bulletY, bulletWidth, bulletHeight);
 }
 
 function drawEnemy() {
-    ctx.drawImage(enemyImg, enemyX, enemyY, 40, 40);
+    ctx.drawImage(enemyImg, enemyX, enemyY, enemyWidth, enemyHeight);
 }
 
 function drawExplosion() {
-    ctx.drawImage(explosion, bulletX - 15, bulletY - 20, 100, 100);
+    ctx.drawImage(explosion, bulletX - explosionXAxes, bulletY - explosionYAxes, explosionWidth, explosionHeight);
 }
 
 function getRandomInt(min, max) {
@@ -83,7 +100,7 @@ function enemyBehavior() {
         if (enemyRandomX >= canvas.width) {
             enemyRandomX - enemy.width
         } else if (enemyRandomX <= canvas.width) {
-            enemyRandomX - 40
+            enemyRandomX - enemyWidth
         }
 
         enemyX = enemyRandomX;
@@ -103,16 +120,16 @@ function bulletBehavior() {
         }
 
         if (
-            bulletX < enemyX + 40 &&
-            bulletX + 4 > enemyX &&
-            bulletY < enemyY + 40 &&
-            bulletY + 10 > enemyY
+            bulletX < enemyX + enemyHeight &&
+            bulletX + bulletWidth > enemyX &&
+            bulletY < enemyY + enemyWidth &&
+            bulletY + bulletHeight > enemyY
         ) {
             countDestroiedObjects += 1;
             countScores(countDestroiedObjects, countAvoidedObjects);
 
-            enemyX = Math.random() * (canvas.width - 40);
-            enemyY = -40;
+            enemyX = Math.random() * (canvas.width - enemyWidth);
+            enemyY = -enemyHeight;
             drawExplosionSlow = true;
             drawExplosion();
 
@@ -124,12 +141,12 @@ function bulletBehavior() {
 
 function playerBehavior() {
     if (
-        playerX < enemyX + 80 &&
-        playerX + 80 > enemyX &&
-        playerY < enemyY + 80 &&
-        playerY + 80 > enemyY
+        playerX < enemyX + playerWidth &&
+        playerX + playerWidth > enemyX &&
+        playerY < enemyY + playerHeight &&
+        playerY + playerHeight > enemyY
     ) {
-        ctx.drawImage(explosion, enemyX - 15, enemyY - 20, 100, 100);
+        ctx.drawImage(explosion, enemyX - explosionXAxes, enemyY - explosionYAxes, explosionWidth, explosionHeight);
         isGameOver = true;
         gameOverScreen.style.display = "flex";
     }
@@ -155,10 +172,12 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawPlayer();
-    enemyBehavior();
-    bulletBehavior();
-    playerBehavior();
     drawEnemy();
+
+    playerBehavior();
+    bulletBehavior();
+    enemyBehavior();
+
     gameOverBehavior();
 }
 
